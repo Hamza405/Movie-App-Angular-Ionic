@@ -1,5 +1,5 @@
 import { Component, EnvironmentInjector, OnInit } from '@angular/core';
-import { LoadingController } from '@ionic/angular';
+import { InfiniteScrollCustomEvent, LoadingController } from '@ionic/angular';
 import {MoviesServiceService} from "../../services/movies-service.service"
 import { environment } from 'src/environments/environment';
 
@@ -19,7 +19,7 @@ export class MoviesPage implements OnInit {
     this.fetchMovies()
   }
 
-  async fetchMovies() {
+  async fetchMovies(event?: InfiniteScrollCustomEvent) {
     const loading =await this.loadingController.create({
       message: 'Loading ...',
       spinner: "bubbles"
@@ -28,9 +28,16 @@ export class MoviesPage implements OnInit {
     await loading.present()
 
     this.moviesService.getMovies(this.currentPage).subscribe(res=>{
-      this.movies = [...res.results]
+      this.movies.push(...res.results);
       loading.dismiss()
       console.log(res)
+      event?.target.complete()
     })
+    
+  }
+
+  loadMore(event: any) {
+    this.currentPage++;
+    this.fetchMovies(event)
   }
 }
